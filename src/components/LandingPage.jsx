@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogoIcon, BoltIcon, ShieldCheckIcon, GlobeIcon } from './Icons.jsx';
+import { LogoIcon, BoltIcon, ShieldCheckIcon, GlobeIcon, PackageIcon, SearchIcon } from './Icons.jsx';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -223,6 +223,27 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Order Tracking Section */}
+            <section className="px-4 sm:px-6 py-12 bg-slate-50/50 border-y border-blue-50">
+                <div className="max-w-3xl mx-auto text-center">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-4 text-xs font-extrabold tracking-widest text-blue-700 bg-blue-50 border border-blue-100/60 uppercase rounded-full shadow-sm">
+                        <PackageIcon className="w-4 h-4" />
+                        Order Tracking
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 mb-3">Track Your Orders</h2>
+                    <p className="text-sm text-slate-500 font-medium mb-6">
+                        Already placed an order? Check the status of your purchase by entering your email or order ID.
+                    </p>
+                    <a
+                        href="/track"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition-colors shadow-lg"
+                    >
+                        <SearchIcon className="w-4 h-4" />
+                        Track My Order
+                    </a>
+                </div>
+            </section>
+
             {/* Contained Footer Area */}
             <footer className="bg-white border-t border-blue-50 py-10 px-4 sm:px-6">
                 <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -231,7 +252,7 @@ export default function LandingPage() {
                         <span className="text-lg font-black tracking-tighter text-blue-950">brandeur</span>
                     </div>
                     <div className="flex gap-6 text-xs font-bold text-slate-400">
-                        <a href="/track" className="hover:text-blue-600 transition-colors">Track Order</a>
+                       
                         <a href="/terms" className="hover:text-blue-600 transition-colors">Terms</a>
                         <a href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</a>
                     </div>

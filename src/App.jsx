@@ -8,6 +8,7 @@ import VendorDashboard from './components/VendorDashboard';
 import StoreFront from './components/StoreFront';
 import NotFound from './pages/NotFound';
 import OrderTracking from './pages/OrderTracking';
+import AdminPanel from './components/AdminPanel';
 
 export default function App() {
     const [session, setSession] = useState(null);
@@ -58,6 +59,11 @@ export default function App() {
                     <Route
                         path="/dashboard"
                         element={session ? <VendorDashboard /> : <Navigate to="/login" replace />}
+                    />
+
+                    <Route
+                        path="/admin"
+                        element={session ? <AdminPanel /> : <Navigate to="/login" replace />}
                     />
 
                     <Route path="/track" element={<OrderTracking />} />

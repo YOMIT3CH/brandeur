@@ -9,7 +9,12 @@ export default function CartModal({ isOpen, onClose }) {
     const [submitting, setSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
-
+    
+    // Discount States
+    const [discountCode, setDiscountCode] = useState('');
+    const [appliedDiscount, setAppliedDiscount] = useState(null);
+    const [discountError, setDiscountError] = useState('');
+    
     const handleCheckout = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -21,6 +26,14 @@ export default function CartModal({ isOpen, onClose }) {
             // Get vendor ID from first cart item
             const vendorId = cartItems[0]?.vendor_id;
 
+            // Calculate total with discount
+            const discountAmount = appliedDiscount 
+                ? (appliedDiscount.type === 'percentage' 
+                    ? cartTotal * (appliedDiscount.value / 100)
+                    : Math.min(appliedDiscount.value, cartTotal))
+                : 0;
+            const finalTotal = cartTotal - discountAmount;
+
             const checkoutPayload = {
                 vendor_id: vendorId,
                 items: JSON.stringify(cartItems.map(item => ({
@@ -29,12 +42,22 @@ export default function CartModal({ isOpen, onClose }) {
                     price: item.price,
                     quantity: item.quantity
                 }))),
-                total: cartTotal,
+                total: finalTotal,
                 address: orderForm.address,
                 phone: orderForm.phone,
                 customer_email: orderForm.email,
-                status: 'Pending'
+                status: 'Pending',
+                discount_code: appliedDiscount?.code || null,
+                discount_amount: discountAmount
             };
+
+            // Increment discount usage if applied
+            if (appliedDiscount) {
+                await supabase
+                    .from('discounts')
+                    .update({ uses: (appliedDiscount.uses || 0) + 1 })
+                    .eq('id', appliedDiscount.id);
+            }
 
             const { error } = await supabase
                 .from('orders')
@@ -140,16 +163,107 @@ export default function CartModal({ isOpen, onClose }) {
                             />
                         </div>
 
+                        {/* Discount Code Input */}
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
-                            <input
-                                type="tel"
-                                required
-                                value={orderForm.phone}
-                                onChange={(e) => setOrderForm({ ...orderForm, phone: e.target.value })}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 rounded-xl text-xs font-medium outline-none transition-all"
-                                placeholder="+234 801 234 5678"
-                            />
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Discount Code (optional)</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Enter code"
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                    disabled={!!appliedDiscount || submitting}
+                                    className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 focus:bg-white rounded-xl text-xs font-medium text-slate-900 placeholder-slate-400 outline-none transition-all focus:ring-4 focus:ring-blue-600/5 disabled:opacity-60"
+                                />
+                                {appliedDiscount ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setAppliedDiscount(null);
+                                            setDiscountCode('');
+                                        }}
+                                        className="px-4 py-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl text-xs"
+                                    >
+                                        Remove
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            if (!discountCode) return;
+                                            try {
+                                                const { supabase } = await import('../lib/supabaseClient.js');
+                                                const vendorId = cartItems[0]?.vendor_id;
+                                                const { data, error } = await supabase
+                                                    .from('discounts')
+                                                    .select('*')
+                                                    .eq('code', discountCode)
+                                                    .eq('vendor_id', vendorId)
+                                                    .single();
+                                                
+                                                if (error || !data) {
+                                                    setDiscountError('Invalid discount code');
+                                                    return;
+                                                }
+
+                                                // Check expiry
+                                                if (data.expires_at && new Date(data.expires_at) < new Date()) {
+                                                    setDiscountError('Discount has expired');
+                                                    return;
+                                                }
+
+                                                // Check max uses
+                                                if (data.max_uses && data.uses >= data.max_uses) {
+                                                    setDiscountError('Discount usage limit reached');
+                                                    return;
+                                                }
+
+                                                // Check minimum order
+                                                if (data.min_order && cartTotal < data.min_order) {
+                                                    setDiscountError(`Minimum order of ₦${data.min_order} required`);
+                                                    return;
+                                                }
+
+                                                setAppliedDiscount(data);
+                                                setDiscountError('');
+                                                setToast({ show: true, message: `Discount ${data.code} applied!`, type: 'success' });
+                                            } catch (err) {
+                                                setDiscountError('Error applying discount');
+                                            }
+                                        }}
+                                        disabled={!discountCode || submitting}
+                                        className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs disabled:opacity-50"
+                                    >
+                                        Apply
+                                    </button>
+                                )}
+                            </div>
+                            {discountError && (
+                                <p className="text-[10px] text-red-600 mt-1">{discountError}</p>
+                            )}
+                            {appliedDiscount && (
+                                <p className="text-[10px] text-emerald-600 mt-1 font-bold">
+                                    {appliedDiscount.type === 'percentage' 
+                                        ? `${appliedDiscount.value}% off` 
+                                        : `₦${appliedDiscount.value} off`}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Total with Discount */}
+                        <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100 mb-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-bold text-slate-700">Total Amount</span>
+                                <span className="text-xl font-black text-blue-600">
+                                    ₦{appliedDiscount 
+                                        ? (appliedDiscount.type === 'percentage' 
+                                            ? (cartTotal * (1 - appliedDiscount.value / 100)).toFixed(2)
+                                            : Math.max(0, cartTotal - appliedDiscount.value).toFixed(2)
+                                        )
+                                        : cartTotal.toFixed(2)
+                                    }
+                                </span>
+                            </div>
                         </div>
 
                         <div className="flex gap-3 pt-2">

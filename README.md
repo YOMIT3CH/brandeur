@@ -11,12 +11,20 @@ A modern, affordable e-commerce solution for vendors who can't afford expensive 
 - **Order Management** - Track and manage customer orders
 - **Real-time Dashboard** - View stats, revenue, and order status
 - **Unique Store Links** - Share your custom storefront URL with customers
+- **Payment Methods** - Configure bank transfer, mobile money, and cash on delivery
 
 ### For Customers
 - **Browse Stores** - Visit vendor stores via unique links
 - **Easy Checkout** - Simple order placement with address and phone
 - **No Account Required** - Shop without signing up
 - **Mobile Friendly** - Responsive design for all devices
+
+### For Admins
+- **Platform Overview** - View total vendors, products, orders, and revenue
+- **Vendor Management** - View and manage all vendors on the platform
+- **Product Management** - View and manage all products across vendors
+- **Order Management** - View and manage all orders on the platform
+- **Secure Access** - Admin-only access with email-based authentication
 
 ## Tech Stack
 
@@ -80,11 +88,21 @@ myshop/
 │   │   ├── LandingPage.jsx      # Marketing homepage
 │   │   ├── AuthPage.jsx         # Login/Signup forms
 │   │   ├── VendorDashboard.jsx  # Vendor management panel
-│   │   └── StoreFront.jsx       # Public storefront
+│   │   ├── StoreFront.jsx       # Public storefront
+│   │   ├── AdminPanel.jsx       # Admin panel for platform management
+│   │   ├── AdminIcons.jsx       # Admin-specific icons
+│   │   ├── Toast.jsx            # Notification component
+│   │   ├── ConfirmationModal.jsx # Confirmation dialog
+│   │   └── Icons.jsx            # Shared icon components
 │   ├── hooks/
 │   │   └── useImageUpload.js    # Image upload utility
+│   ├── context/
+│   │   └── CartContext.jsx      # Shopping cart context
 │   ├── lib/
 │   │   └── supabaseClient.js    # Supabase configuration
+│   ├── pages/
+│   │   ├── NotFound.jsx         # 404 page
+│   │   └── OrderTracking.jsx    # Order tracking page
 │   ├── App.jsx                  # Main app with routing
 │   ├── main.jsx                 # Entry point
 │   └── index.css                # Global styles
@@ -176,6 +194,22 @@ netlify deploy --prod --dir=dist
 |----------|-------------|
 | `VITE_SUPABASE_URL` | Your Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key |
+| `VITE_ADMIN_EMAIL` | Email address for admin access (default: admin@brandeur.com) |
+
+## Admin Panel Access
+
+To access the admin panel, you need to:
+
+1. Set the `VITE_ADMIN_EMAIL` environment variable to your admin email address
+2. Log in with that email address
+3. Navigate to `/admin` or click the admin link
+
+The admin panel provides:
+- **Overview** - Platform statistics and recent activity
+- **Vendors** - View and manage all vendors
+- **Products** - View and manage all products
+- **Orders** - View and manage all orders
+
 
 ## Scripts
 
@@ -221,8 +255,7 @@ For issues or questions:
 - [ ] Product variants (size, color, etc.)
 - [ ] Discount codes and coupons
 - [ ] Customer reviews and ratings
-- [ ] Admin panel for platform management
-- [ ] Mobile app (React Native)
+- [x] Admin panel for platform management
 
 ## Acknowledgments
 

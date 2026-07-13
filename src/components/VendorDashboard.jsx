@@ -19,6 +19,7 @@ import {
 import Toast from './Toast.jsx';
 import ConfirmationModal from './ConfirmationModal.jsx';
 import OrderDetailsModal from './OrderDetailsModal.jsx';
+import DiscountManager from './DiscountManager.jsx';
 
 // Skeleton Components
 const StatCardSkeleton = () => (
@@ -75,9 +76,11 @@ export default function VendorDashboard() {
         description: '',
         price: '',
         category: '',
-        image_url: '',
+        tags: '',
+        image_urls: [''],
         stock_quantity: 0,
-        in_stock: true
+        in_stock: true,
+        variants: []
     });
     const [submitting, setSubmitting] = useState(false);
     const { uploadImage, deleteImage, uploading: imageUploading, error: imageError } = useImageUpload();
@@ -100,6 +103,19 @@ export default function VendorDashboard() {
         cash_on_delivery: { enabled: true }
     });
     const [savingPaymentMethods, setSavingPaymentMethods] = useState(false);
+
+    // Analytics State
+    const [analytics, setAnalytics] = useState({
+        dailySales: [],
+        topProducts: [],
+        orderStatusDistribution: { pending: 0, processing: 0, fulfilled: 0, cancelled: 0 }
+    });
+    const [showVariantModal, setShowVariantModal] = useState(false);
+    const [variants, setVariants] = useState([]);
+    const [variantForm, setVariantForm] = useState({
+        name: '',
+        options: ['']
+    });
 
     // Get current user session
     useEffect(() => {
@@ -201,7 +217,9 @@ export default function VendorDashboard() {
                 description: productForm.description,
                 price: parseFloat(productForm.price),
                 category: productForm.category,
-                image_url: productForm.image_url || null,
+                tags: productForm.tags ? productForm.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+                image_url: productForm.image_urls?.[0] || null,
+                image_urls: productForm.image_urls?.filter(url => url) || [],
                 stock_quantity: parseInt(productForm.stock_quantity) || 0,
                 in_stock: productForm.in_stock
             };
@@ -241,9 +259,11 @@ export default function VendorDashboard() {
                 description: '',
                 price: '',
                 category: '',
-                image_url: '',
+                tags: '',
+                image_urls: [''],
                 stock_quantity: 0,
-                in_stock: true
+                in_stock: true,
+                variants: []
             });
 
         } catch (err) {
@@ -469,7 +489,7 @@ export default function VendorDashboard() {
 
                 {/* Tab Navigation */}
                 <div className="flex gap-2 mb-6 border-b border-blue-50">
-                    {['overview', 'products', 'orders'].map(tab => (
+                    {['overview', 'products', 'orders', 'analytics'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -479,7 +499,7 @@ export default function VendorDashboard() {
                                     : 'bg-white text-slate-600 hover:bg-slate-50 border border-blue-100'
                             }`}
                         >
-                            {tab === 'overview' ? 'Store Overview' : tab === 'products' ? 'Product Catalog' : 'Order Management'}
+                            {tab === 'overview' ? 'Store Overview' : tab === 'products' ? 'Product Catalog' : tab === 'orders' ? 'Order Management' : 'Analytics'}
                         </button>
                     ))}
                 </div>
@@ -540,6 +560,11 @@ export default function VendorDashboard() {
                                 )}
                             </div>
                         </div>
+
+                        {/* Discount Codes Card */}
+                        <div className="bg-white border border-blue-100/40 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
+                            <DiscountManager vendorId={session.user.id} />
+                        </div>
                     </div>
                 )}
 
@@ -555,9 +580,11 @@ export default function VendorDashboard() {
                                         description: '',
                                         price: '',
                                         category: '',
-                                        image_url: '',
+                                        tags: '',
+                                        image_urls: [''],
                                         stock_quantity: 0,
-                                        in_stock: true
+                                        in_stock: true,
+                                        variants: []
                                     });
                                     setShowProductModal(true);
                                 }}
@@ -691,6 +718,48 @@ export default function VendorDashboard() {
                         )}
                     </div>
                 )}
+
+                {activeTab === 'analytics' && (
+                    <div>
+                        <h2 className="text-lg font-black text-slate-950 mb-6">Store Analytics</h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Order Status Distribution */}
+                            <div className="bg-white border border-blue-100/40 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
+                                <h3 className="text-sm font-bold text-slate-900 mb-4">Order Status Distribution</h3>
+                                <div className="space-y-3">
+                                    {Object.entries({
+                                        Pending: stats.pendingOrders,
+                                        Processing: orders.filter(o => o.status === 'Processing').length,
+                                        Fulfilled: orders.filter(o => o.status === 'Fulfilled').length,
+                                        Cancelled: orders.filter(o => o.status === 'Cancelled').length
+                                    }).map(([status, count]) => (
+                                        <div key={status} className="flex justify-between items-center">
+                                            <span className="text-xs font-bold text-slate-600">{status}</span>
+                                            <span className="text-sm font-black text-slate-950">{count}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Top Products */}
+                            <div className="bg-white border border-blue-100/40 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
+                                <h3 className="text-sm font-bold text-slate-900 mb-4">Top Products by Price</h3>
+                                <div className="space-y-3">
+                                    {products.slice(0, 5).map((product) => (
+                                        <div key={product.id} className="flex justify-between items-center">
+                                            <span className="text-xs text-slate-600 truncate max-w-[180px]">{product.title}</span>
+                                            <span className="text-sm font-black text-blue-600">₦{Number(product.price).toFixed(2)}</span>
+                                        </div>
+                                    ))}
+                                    {products.length === 0 && (
+                                        <p className="text-xs text-slate-400">No products to display</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Product Modal */}
@@ -765,6 +834,18 @@ export default function VendorDashboard() {
                             </div>
 
                             <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Tags (comma separated)</label>
+                                <input
+                                    type="text"
+                                    value={productForm.tags}
+                                    onChange={(e) => setProductForm({ ...productForm, tags: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 rounded-xl text-sm font-medium outline-none transition-all"
+                                    placeholder="e.g. wireless, bluetooth, audio"
+                                />
+                                <p className="text-[10px] text-slate-400 mt-1">Add tags to help customers find your product</p>
+                            </div>
+
+                            <div>
                                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Stock Quantity</label>
                                 <input
                                     type="number"
@@ -777,43 +858,76 @@ export default function VendorDashboard() {
                             </div>
 
                             <div>
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Image</label>
-                                <div className="flex gap-3">
-                                    <input
-                                        type="url"
-                                        value={productForm.image_url}
-                                        onChange={(e) => setProductForm({ ...productForm, image_url: e.target.value })}
-                                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 rounded-xl text-sm font-medium outline-none transition-all"
-                                        placeholder="https://example.com/image.jpg"
-                                    />
-                                    <label className="px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-xl text-xs cursor-pointer transition-colors">
-                                        Upload
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={async (e) => {
-                                                const file = e.target.files[0];
-                                                if (file) {
-                                                    try {
-                                                        const url = await uploadImage(file, session.user.id);
-                                                        setProductForm({ ...productForm, image_url: url });
-                                                    } catch (err) {
-                                                        setToast({ show: true, message: `Upload failed: ${err.message}`, type: 'error' });
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Product Images</label>
+                                <div className="space-y-2">
+                                    {productForm.image_urls.map((url, idx) => (
+                                        <div key={idx} className="flex gap-2">
+                                            <input
+                                                type="url"
+                                                value={url}
+                                                onChange={(e) => {
+                                                    const newUrls = [...productForm.image_urls];
+                                                    newUrls[idx] = e.target.value;
+                                                    setProductForm({ ...productForm, image_urls: newUrls });
+                                                }}
+                                                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 rounded-xl text-sm font-medium outline-none transition-all"
+                                                placeholder="https://example.com/image.jpg"
+                                            />
+                                            {productForm.image_urls.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setProductForm({ ...productForm, image_urls: productForm.image_urls.filter((_, i) => i !== idx) });
+                                                    }}
+                                                    className="p-3 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl"
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductForm({ ...productForm, image_urls: [...productForm.image_urls, ''] })}
+                                            className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-xl text-xs"
+                                        >
+                                            + Add Image
+                                        </button>
+                                        <label className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold rounded-xl text-xs cursor-pointer">
+                                            Upload
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={async (e) => {
+                                                    const files = Array.from(e.target.files);
+                                                    for (const file of files) {
+                                                        try {
+                                                            const url = await uploadImage(file, session.user.id);
+                                                            setProductForm(prev => ({ ...prev, image_urls: [...prev.image_urls, url] }));
+                                                        } catch (err) {
+                                                            setToast({ show: true, message: `Upload failed: ${err.message}`, type: 'error' });
+                                                        }
                                                     }
-                                                }
-                                            }}
-                                            className="hidden"
-                                        />
-                                    </label>
-                                </div>
-                                {imageUploading && (
-                                    <p className="text-[10px] text-blue-600 mt-1">Uploading image...</p>
-                                )}
-                                {productForm.image_url && (
-                                    <div className="mt-2 w-20 h-20 rounded-xl overflow-hidden border border-slate-200">
-                                        <img src={productForm.image_url} alt="Preview" className="w-full h-full object-cover" />
+                                                }}
+                                                className="hidden"
+                                            />
+                                        </label>
                                     </div>
-                                )}
+                                    {imageUploading && (
+                                        <p className="text-[10px] text-blue-600">Uploading image...</p>
+                                    )}
+                                    {productForm.image_urls.filter(url => url).length > 0 && (
+                                        <div className="flex gap-2 mt-2 flex-wrap">
+                                            {productForm.image_urls.filter(url => url).map((url, idx) => (
+                                                <div key={idx} className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200">
+                                                    <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex items-center gap-3 pt-2">
@@ -827,6 +941,39 @@ export default function VendorDashboard() {
                                 <label htmlFor="in_stock" className="text-xs font-bold text-slate-700">
                                     Product is available for sale
                                 </label>
+                            </div>
+
+                            {/* Variants Section */}
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                                    Product Variants
+                                </label>
+                                <div className="space-y-2">
+                                    {variants.length > 0 ? (
+                                        variants.map((variant, idx) => (
+                                            <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                                                <span className="text-xs font-bold text-slate-600">{variant.name}:</span>
+                                                <span className="text-xs text-slate-500">{variant.options.join(', ')}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setVariants(prev => prev.filter((_, i) => i !== idx))}
+                                                    className="ml-auto text-red-600 hover:text-red-700"
+                                                >
+                                                    <TrashIcon className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-xs text-slate-400">No variants added</p>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowVariantModal(true)}
+                                        className="text-xs font-bold text-blue-600 hover:text-blue-700"
+                                    >
+                                        + Add Variant
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-4">
@@ -1123,6 +1270,73 @@ export default function VendorDashboard() {
                 }}
                 onCancel={() => setConfirmModal({ show: false, message: '', onConfirm: null })}
             />
+
+            {/* Variant Modal */}
+            {showVariantModal && (
+                <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+                    <div className="bg-white w-full max-w-[420px] rounded-3xl p-6 sm:p-8 border border-blue-50 shadow-2xl">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 className="text-xl font-black text-slate-950">Add Product Variant</h2>
+                                <p className="text-xs text-slate-400 font-medium mt-1">Add size, color, or other options</p>
+                            </div>
+                            <button
+                                onClick={() => setShowVariantModal(false)}
+                                className="text-slate-400 hover:text-slate-950 text-2xl leading-none"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Variant Name</label>
+                                <input
+                                    type="text"
+                                    value={variantForm.name}
+                                    onChange={(e) => setVariantForm({ ...variantForm, name: e.target.value })}
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 rounded-xl text-sm font-medium outline-none transition-all"
+                                    placeholder="e.g. Size, Color"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Options (one per line)</label>
+                                <textarea
+                                    value={variantForm.options.join('\n')}
+                                    onChange={(e) => setVariantForm({ ...variantForm, options: e.target.value.split('\n').map(o => o.trim()).filter(o => o) })}
+                                    rows="4"
+                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200/50 focus:border-blue-600 rounded-xl text-sm font-medium outline-none transition-all resize-none"
+                                    placeholder="Small&#10;Medium&#10;Large"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowVariantModal(false)}
+                                    className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (variantForm.name && variantForm.options.length > 0) {
+                                            setVariants(prev => [...prev, { name: variantForm.name, options: variantForm.options }]);
+                                            setVariantForm({ name: '', options: [''] });
+                                            setShowVariantModal(false);
+                                        }
+                                    }}
+                                    className="flex-1 px-4 py-3 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 transition-colors"
+                                >
+                                    Add Variant
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Toast */}
             {toast.show && (

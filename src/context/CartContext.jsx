@@ -11,6 +11,10 @@ export function CartProvider({ children }) {
         const saved = localStorage.getItem('cart_vendor');
         return saved || null;
     });
+    const [wishlistItems, setWishlistItems] = useState(() => {
+        const saved = localStorage.getItem('wishlist');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cartItems));
@@ -23,6 +27,10 @@ export function CartProvider({ children }) {
             localStorage.removeItem('cart_vendor');
         }
     }, [vendorId]);
+
+    useEffect(() => {
+        localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+    }, [wishlistItems]);
 
     const addToCart = (product) => {
         // Clear cart if adding from a different vendor
@@ -79,6 +87,26 @@ export function CartProvider({ children }) {
     const cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+    // Wishlist functions
+    const addToWishlist = (product) => {
+        setWishlistItems(prev => {
+            if (prev.find(item => item.id === product.id)) {
+                return prev; // Already in wishlist
+            }
+            return [...prev, product];
+        });
+    };
+
+    const removeFromWishlist = (productId) => {
+        setWishlistItems(prev => prev.filter(item => item.id !== productId));
+    };
+
+    const isInWishlist = (productId) => {
+        return wishlistItems.some(item => item.id === productId);
+    };
+
+    const wishlistCount = wishlistItems.length;
+
     return (
         <CartContext.Provider value={{
             cartItems,
@@ -88,7 +116,12 @@ export function CartProvider({ children }) {
             clearCart,
             cartTotal,
             cartCount,
-            vendorId
+            vendorId,
+            wishlistItems,
+            addToWishlist,
+            removeFromWishlist,
+            isInWishlist,
+            wishlistCount
         }}>
             {children}
         </CartContext.Provider>
