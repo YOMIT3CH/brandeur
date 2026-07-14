@@ -73,16 +73,16 @@ export default function LandingPage() {
             Vetted E-Commerce Setup
           </span>
 
-                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter text-slate-950 leading-[1.08] mb-6">
-                        STOP PAYING FOR <br />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500">
-              WEBSITES YOU DON'T NEED.
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter text-slate-950 leading-[1.08] mb-6">
+                STOP PAYING FOR <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500">
+            WEBSITES YOU DON'T NEED.
             </span>
-                    </h1>
+            </h1>
 
-                    <p className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 font-normal leading-relaxed">
-                        Instantly dispatch your personal custom store routing links, seamlessly control inventory metrics, and channel payouts direct. No overhead configuration necessary.
-                    </p>
+            <p className="text-base sm:text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 font-normal leading-relaxed">
+                Create your online store in minutes. Add products, manage orders, and get paid - all without any coding or setup fees.
+            </p>
 
                     <div className="flex flex-col sm:flex-row justify-center items-center gap-3 max-w-sm sm:max-w-none mx-auto">
                         <button
@@ -137,8 +137,8 @@ export default function LandingPage() {
             <section id="features" className="py-20 px-4 sm:px-6 bg-slate-50/50 border-y border-blue-50">
                 <div className={`max-w-5xl mx-auto transition-all duration-1000 delay-300 transform ${visibleSections.bento ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
                     <div className="max-w-xl mx-auto text-center mb-16">
-                        <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-950 mb-3">Everything Required to Sell Product.</h2>
-                        <p className="text-sm sm:text-base text-slate-500 font-medium">Bypass complex development setups. Access clean core architectural efficiency parameters.</p>
+                        <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-950 mb-3">Everything You Need to Sell Online</h2>
+                        <p className="text-sm sm:text-base text-slate-500 font-medium">Simple tools to run your store without any technical skills.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -147,9 +147,9 @@ export default function LandingPage() {
                             <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-xl mb-6 group-hover:bg-blue-600 group-hover:text-white text-blue-600 transition-colors duration-300">
                                 <BoltIcon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-950 mb-2">Lightning Deployment</h3>
+                            <h3 className="text-lg font-bold text-slate-950 mb-2">Quick Store Setup</h3>
                             <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
-                                Initialize instances swiftly. Drop items directly via dashboards into globally distributed layout CDNs inside moments.
+                                Create your store in minutes. Add products and start selling right away.
                             </p>
                         </div>
 
@@ -158,9 +158,9 @@ export default function LandingPage() {
                             <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-xl mb-6 group-hover:bg-blue-600 group-hover:text-white text-blue-600 transition-colors duration-300">
                                 <ShieldCheckIcon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-950 mb-2">Optimized Guest Flow</h3>
+                            <h3 className="text-lg font-bold text-slate-950 mb-2">Easy Ordering</h3>
                             <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
-                                Strip away typical sign-up conversion friction entirely. Customers finalize secure acquisitions in two distinct taps.
+                                Customers can buy from your store in just two clicks. No account needed.
                             </p>
                         </div>
 
@@ -169,9 +169,9 @@ export default function LandingPage() {
                             <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-xl mb-6 group-hover:bg-blue-600 group-hover:text-white text-blue-600 transition-colors duration-300">
                                 <GlobeIcon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-950 mb-2">Automated Wallets</h3>
+                            <h3 className="text-lg font-bold text-slate-950 mb-2">Get Paid Easily</h3>
                             <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
-                                Connect backend configurations straight to payouts natively. Liquid assets routes process securely over isolated channels.
+                                Connect your bank account and receive payments directly. Simple and secure.
                             </p>
                         </div>
                     </div>
@@ -181,13 +181,13 @@ export default function LandingPage() {
             {/* 5. Clean Interactive FAQ Accordion Block */}
             <section className="py-20 px-4 sm:px-6 max-w-3xl mx-auto">
                 <div className={`transition-all duration-1000 delay-400 transform ${visibleSections.faq ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-center text-slate-950 mb-10">Frequently Answered Parameters</h2>
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-center text-slate-950 mb-10">Frequently Asked Questions</h2>
 
                     <div className="space-y-3">
                         {[
-                            { q: "Are there unexpected underlying monthly service dues?", a: "Negative. Standard infrastructure access configuration relies squarely upon minimal native allocation splits strictly per transactional checkout execution." },
-                            { q: "Can I implement individual domain overrides?", a: "Affirmative. The merchant administrative dashboard provides interface points to map domain layers instantly across custom names safely." },
-                            { q: "How are inventory limits restricted?", a: "Core structural layouts allow independent vendors infinite item additions, supported directly through integrated object databases." }
+                            { q: "Is there a monthly fee?", a: "No hidden fees. You only pay a small percentage when you make a sale." },
+                            { q: "Can I use my own domain name?", a: "Yes! You can connect your own domain to your store from your dashboard." },
+                            { q: "How many products can I add?", a: "You can add as many products as you want. There are no limits." }
                         ].map((faq, idx) => (
                             <div key={idx} className="border border-blue-50 bg-white rounded-xl overflow-hidden transition-all duration-300">
                                 <button
