@@ -4,32 +4,32 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState(() => {
-        const saved = localStorage.getItem('cart');
+        const saved = sessionStorage.getItem('cart');
         return saved ? JSON.parse(saved) : [];
     });
     const [vendorId, setVendorId] = useState(() => {
-        const saved = localStorage.getItem('cart_vendor');
+        const saved = sessionStorage.getItem('cart_vendor');
         return saved || null;
     });
     const [wishlistItems, setWishlistItems] = useState(() => {
-        const saved = localStorage.getItem('wishlist');
+        const saved = sessionStorage.getItem('wishlist');
         return saved ? JSON.parse(saved) : [];
     });
 
     useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(cartItems));
+        sessionStorage.setItem('cart', JSON.stringify(cartItems));
     }, [cartItems]);
 
     useEffect(() => {
         if (vendorId) {
-            localStorage.setItem('cart_vendor', vendorId);
+            sessionStorage.setItem('cart_vendor', vendorId);
         } else {
-            localStorage.removeItem('cart_vendor');
+            sessionStorage.removeItem('cart_vendor');
         }
     }, [vendorId]);
 
     useEffect(() => {
-        localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+        sessionStorage.setItem('wishlist', JSON.stringify(wishlistItems));
     }, [wishlistItems]);
 
     const addToCart = (product) => {

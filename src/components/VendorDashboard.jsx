@@ -611,10 +611,10 @@ export default function VendorDashboard() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {products.map((product) => (
                                     <div key={product.id} className="bg-white border border-blue-100/40 rounded-2xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_30px_rgba(37,99,235,0.04)] transition-all">
-                                        {product.image_url ? (
+                                        {product.image_urls?.[0] || product.image_url ? (
                                             <div className="w-full h-32 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 mb-3">
                                                 <img 
-                                                    src={product.image_url} 
+                                                    src={product.image_urls?.[0] || product.image_url} 
                                                     alt={product.title} 
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
@@ -643,15 +643,16 @@ export default function VendorDashboard() {
                                                 <button
                                                     onClick={() => {
                                                         setEditingProduct(product);
-                                                        setProductForm({
-                                                            title: product.title,
-                                                            description: product.description || '',
-                                                            price: product.price.toString(),
-                                                            category: product.category || '',
-                                                            image_url: product.image_url || '',
-                                                            stock_quantity: product.stock_quantity || 0,
-                                                            in_stock: product.in_stock
-                                                        });
+                                                setProductForm({
+                                                    title: product.title,
+                                                    description: product.description || '',
+                                                    price: product.price.toString(),
+                                                    category: product.category || '',
+                                                    tags: product.tags ? product.tags.join(', ') : '',
+                                                    image_urls: product.image_urls?.length > 0 ? product.image_urls : [product.image_url || ''],
+                                                    stock_quantity: product.stock_quantity || 0,
+                                                    in_stock: product.in_stock
+                                                });
                                                         setShowProductModal(true);
                                                     }}
                                                     className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors"

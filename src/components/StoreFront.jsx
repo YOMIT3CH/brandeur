@@ -42,6 +42,7 @@ export default function StoreFront() {
 
     // Order & Modal Pipeline States
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [viewingProduct, setViewingProduct] = useState(null);
     const [orderQuantity, setOrderQuantity] = useState(1);
     const [orderForm, setOrderForm] = useState({ address: '', phone: '', email: '' });
     const [orderSuccess, setOrderSuccess] = useState(false);
@@ -327,25 +328,42 @@ export default function StoreFront() {
                             {filteredProducts.map((product) => (
                                 <div key={product.id} className="bg-white border border-blue-50/60 rounded-3xl overflow-hidden p-5 shadow-[0_4px_25px_rgba(37,99,235,0.01)] hover:shadow-[0_12px_30px_rgba(37,99,235,0.04)] hover:border-blue-100 transition-all duration-300 flex flex-col justify-between group">
                                     <div>
-                                        {product.image_url ? (
-                                            <div className="w-full h-52 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 mb-4 relative">
+                                        {product.image_urls?.[0] || product.image_url ? (
+                                            <div className="w-full h-52 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 mb-4 relative cursor-pointer"
+                                                onClick={() => setViewingProduct(product)}
+                                            >
                                                 <img 
-                                                    src={product.image_url} 
+                                                    src={product.image_urls?.[0] || product.image_url} 
                                                     alt={product.title} 
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                     onError={(e) => {
                                                         e.target.style.display = 'none';
-                                                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Image Unavailable</div>';
+                                                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase">Image Unavailable</div>';
                                                     }}
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="w-full h-52 rounded-2xl bg-slate-50/80 border border-dashed border-slate-200 mb-4 flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                            <div className="w-full h-52 rounded-2xl bg-slate-50/80 border border-dashed border-slate-200 mb-4 flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase cursor-pointer"
+                                                onClick={() => setViewingProduct(product)}
+                                            >
                                                 No Image
                                             </div>
                                         )}
-                                        <h3 className="font-bold text-slate-950 text-base tracking-tight mb-1 group-hover:text-blue-600 transition-colors">{product.title}</h3>
-                                        <p className="text-xs text-slate-400 font-medium line-clamp-2 leading-relaxed mb-6">{product.description || 'No description available'}</p>
+                                        <h3 className="font-bold text-slate-950 text-base tracking-tight mb-1 group-hover:text-blue-600 transition-colors cursor-pointer"
+                                            onClick={() => setViewingProduct(product)}
+                                        >{product.title}</h3>
+                                        <p className="text-xs text-slate-400 font-medium line-clamp-2 leading-relaxed mb-3 cursor-pointer"
+                                            onClick={() => setViewingProduct(product)}
+                                        >{product.description || 'No description available'}</p>
+                                        
+                                        {/* Stock Count */}
+                                        {product.in_stock && product.stock_quantity > 0 && (
+                                            <div className="mb-3">
+                                                <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                                                    Stock: {product.stock_quantity}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {!product.in_stock || product.stock_quantity <= 0 ? (
@@ -692,6 +710,111 @@ export default function StoreFront() {
                     type={toast.type}
                     onClose={() => setToast({ ...toast, show: false })}
                 />
+            )}
+
+            {/* Product Detail Modal */}
+            {viewingProduct && (
+                <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+                    <div className="bg-white w-full max-w-[600px] rounded-3xl p-6 sm:p-8 border border-blue-50 shadow-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 className="text-xl font-black text-slate-950 uppercase tracking-tight">Product Details</h2>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">View product information</p>
+                            </div>
+                            <button
+                                onClick={() => setViewingProduct(null)}
+                                className="text-[10px] font-black text-slate-400 hover:text-slate-950 uppercase bg-slate-50 hover:bg-slate-100 border border-slate-200/40 px-2.5 py-1 rounded-lg transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Product Image */}
+                            {viewingProduct.image_urls?.[0] || viewingProduct.image_url ? (
+                                <div className="w-full h-64 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
+                                    <img 
+                                        src={viewingProduct.image_urls?.[0] || viewingProduct.image_url} 
+                                        alt={viewingProduct.title} 
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase">Image Unavailable</div>';
+                                        }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-full h-64 rounded-2xl bg-slate-50/80 border border-dashed border-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400 uppercase">
+                                    No Image
+                                </div>
+                            )}
+
+                            {/* Product Info */}
+                            <div>
+                                <h3 className="text-lg font-black text-slate-950 mb-2">{viewingProduct.title}</h3>
+                                <p className="text-xs text-slate-600 mb-3">{viewingProduct.description || 'No description available'}</p>
+                                
+                                <div className="flex items-center gap-4 mb-3">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">Price</span>
+                                    <span className="text-xl font-black text-blue-600">₦{Number(viewingProduct.price).toFixed(2)}</span>
+                                </div>
+
+                                {viewingProduct.in_stock && viewingProduct.stock_quantity > 0 && (
+                                    <div className="mb-3">
+                                        <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                                            Stock: {viewingProduct.stock_quantity}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {viewingProduct.category && (
+                                    <div className="mb-3">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Category</span>
+                                        <span className="text-xs text-slate-600 ml-2">{viewingProduct.category}</span>
+                                    </div>
+                                )}
+
+                                {viewingProduct.tags?.length > 0 && (
+                                    <div className="mb-3">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Tags</span>
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {viewingProduct.tags.map((tag, idx) => (
+                                                <span key={idx} className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-4 border-t border-slate-100">
+                                <button
+                                    onClick={() => {
+                                        addToCart(viewingProduct);
+                                        setToast({ show: true, message: 'Added to cart!', type: 'success' });
+                                        setViewingProduct(null);
+                                    }}
+                                    disabled={!viewingProduct.in_stock || viewingProduct.stock_quantity <= 0}
+                                    className="flex-1 px-4 py-3 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white font-bold rounded-xl text-xs transition-colors disabled:opacity-50"
+                                >
+                                    Add to Cart
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setSelectedProduct(viewingProduct);
+                                        setViewingProduct(null);
+                                    }}
+                                    disabled={!viewingProduct.in_stock || viewingProduct.stock_quantity <= 0}
+                                    className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-colors disabled:opacity-50"
+                                >
+                                    Buy Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Cart Modal */}

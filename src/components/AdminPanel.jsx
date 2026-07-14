@@ -29,11 +29,30 @@ const TableRowSkeleton = () => (
 export default function AdminPanel() {
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(true);
-    const [session, setSession] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
     const [confirmModal, setConfirmModal] = useState({ show: false, message: '', onConfirm: null });
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Get session from Supabase Auth
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                // Check if user has admin role
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (!error && profile?.is_admin) {
+                    setIsAdmin(true);
+                }
+            }
+        };
+        getSession();
+    }, []);
 
     // Platform Stats
     const [stats, setStats] = useState({
@@ -59,37 +78,59 @@ export default function AdminPanel() {
     const [orderSearch, setOrderSearch] = useState('');
     const [orderStatusFilter, setOrderStatusFilter] = useState('all');
 
-    // Get current user session and check admin status
+    // Check if user is admin
     useEffect(() => {
-        async function getSession() {
+        const checkAdminStatus = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
-            
             if (session?.user) {
-                // Check if user is admin (you can customize this logic)
-                // For now, we'll check if email matches a specific admin email
-                const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-                const isUserAdmin = session.user.email === adminEmail || 
-                    session.user.email?.includes('admin') ||
-                    session.user.user_metadata?.role === 'admin';
-                setIsAdmin(isUserAdmin);
+                try {
+                    // Check if user has admin role
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('is_admin')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (!error && profile?.is_admin) {
+                        setIsAdmin(true);
+                    }
+                } catch (err) {
+                    console.error('Error checking admin status:', err);
+                }
             }
-        }
-        getSession();
+        };
+        checkAdminStatus();
+    }, []);
+
+    // Check session expiration
+    useEffect(() => {
+        const checkSessionExpiration = () => {
+            const adminSession = sessionStorage.getItem('admin_session');
+            if (adminSession) {
+                const parsed = JSON.parse(adminSession);
+                const SESSION_DURATION = 10 * 60 * 1000; // 10 minutes
+                if (Date.now() - parsed.loginTime > SESSION_DURATION) {
+                    sessionStorage.removeItem('admin_session');
+                    window.location.href = '/admin-login';
+                }
+            }
+        };
+        checkSessionExpiration();
     }, []);
 
     // Fetch platform data
     useEffect(() => {
-        if (!session?.user || !isAdmin) return;
+        if (!isAdmin) return;
 
         async function loadAdminData() {
             try {
                 setLoading(true);
 
-                // Fetch all vendors
+                // Fetch all vendors (exclude admin users)
                 const { data: vendorsData, error: vendorsError } = await supabase
                     .from('profiles')
                     .select('*, products(count), orders(count)')
+                    .eq('is_admin', false)
                     .order('created_at', { ascending: false });
 
                 if (vendorsError) throw vendorsError;
@@ -137,10 +178,11 @@ export default function AdminPanel() {
         }
 
         loadAdminData();
-    }, [session, isAdmin]);
+    }, [isAdmin]);
 
-    const handleSignOut = async () => {
-        await supabase.auth.signOut();
+    const handleSignOut = () => {
+        sessionStorage.removeItem('admin_session');
+        supabase.auth.signOut();
         window.location.href = '/';
     };
 
@@ -260,15 +302,6 @@ export default function AdminPanel() {
         const matchesStatus = orderStatusFilter === 'all' || order.status === orderStatusFilter;
         return matchesSearch && matchesStatus;
     });
-
-    if (!session) {
-        return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-3">
-                <span className="inline-block w-6 h-6 border-2 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
-                <span className="text-[11px] font-black uppercase text-slate-400 tracking-widest animate-pulse">Checking Admin Access...</span>
-            </div>
-        );
-    }
 
     if (!isAdmin) {
         return (

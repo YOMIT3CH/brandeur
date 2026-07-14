@@ -28,7 +28,7 @@ export default function AuthPage({ isSignUpFlow = false }) {
 
         try {
             if (isSignUp) {
-                const generatedSlug = formData.shopName
+                let generatedSlug = formData.shopName
                     .toLowerCase()
                     .trim()
                     .replace(/[^a-z0-9\s-]/g, '')
@@ -38,7 +38,20 @@ export default function AuthPage({ isSignUpFlow = false }) {
 
                 if (!generatedSlug) throw new Error('Shop name must contain valid characters.');
 
-                const { error } = await supabase.auth.signUp({
+                // Check if slug already exists and make it unique
+                const { data: existingProfile } = await supabase
+                    .from('profiles')
+                    .select('store_slug')
+                    .eq('store_slug', generatedSlug)
+                    .single();
+
+                if (existingProfile) {
+                    // Add a unique suffix (timestamp or random number)
+                    const uniqueSuffix = Date.now().toString().slice(-4);
+                    generatedSlug = `${generatedSlug}-${uniqueSuffix}`;
+                }
+
+                const { data, error } = await supabase.auth.signUp({
                     email: formData.email,
                     password: formData.password,
                     options: {
@@ -46,9 +59,26 @@ export default function AuthPage({ isSignUpFlow = false }) {
                             store_name: formData.shopName,
                             store_slug: generatedSlug,
                             store_description: formData.shopDescription,
+                            email: formData.email,
                         },
                     },
                 });
+
+                // Create or update profile with email
+                if (!error && data.user) {
+                    const { error: profileError } = await supabase
+                        .from('profiles')
+                        .upsert([{
+                            id: data.user.id,
+                            store_name: formData.shopName,
+                            store_slug: generatedSlug,
+                            store_description: formData.shopDescription,
+                            email: formData.email,
+                            is_admin: false
+                        }], { onConflict: 'id' });
+                    
+                    if (profileError) console.error('Error creating profile:', profileError);
+                }
 
                 if (error) throw error;
                 navigate('/dashboard');

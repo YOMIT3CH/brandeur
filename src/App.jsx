@@ -9,6 +9,7 @@ import StoreFront from './components/StoreFront';
 import NotFound from './pages/NotFound';
 import OrderTracking from './pages/OrderTracking';
 import AdminPanel from './components/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
 
 export default function App() {
     const [session, setSession] = useState(null);
@@ -63,9 +64,10 @@ export default function App() {
 
                     <Route
                         path="/admin"
-                        element={session ? <AdminPanel /> : <Navigate to="/login" replace />}
+                        element={session ? <AdminPanel /> : <Navigate to="/admin-login" replace />}
                     />
 
+                    <Route path="/admin-login" element={<AdminLogin />} />
                     <Route path="/track" element={<OrderTracking />} />
 
                     {/* 404 Catch-all */}
