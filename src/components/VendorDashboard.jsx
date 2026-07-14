@@ -643,27 +643,27 @@ export default function VendorDashboard() {
                                                 <button
                                                     onClick={() => {
                                                         setEditingProduct(product);
-                                                setProductForm({
-                                                    title: product.title,
-                                                    description: product.description || '',
-                                                    price: product.price.toString(),
-                                                    category: product.category || '',
-                                                    tags: product.tags ? product.tags.join(', ') : '',
-                                                    image_urls: product.image_urls?.length > 0 ? product.image_urls : [product.image_url || ''],
-                                                    stock_quantity: product.stock_quantity || 0,
-                                                    in_stock: product.in_stock
-                                                });
+                                                        setProductForm({
+                                                            title: product.title,
+                                                            description: product.description || '',
+                                                            price: product.price.toString(),
+                                                            category: product.category || '',
+                                                            tags: product.tags ? product.tags.join(', ') : '',
+                                                            image_urls: product.image_urls?.length > 0 ? product.image_urls : [product.image_url || ''],
+                                                            stock_quantity: product.stock_quantity || 0,
+                                                            in_stock: product.in_stock
+                                                        });
                                                         setShowProductModal(true);
                                                     }}
-                                                    className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors"
+                                                    className="p-2 sm:p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors"
                                                 >
-                                                    <EditIcon className="w-3.5 h-3.5" />
+                                                    <EditIcon className="w-4 h-4 sm:w-3.5 h-3.5" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteProduct(product)}
-                                                    className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
+                                                    className="p-2 sm:p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
                                                 >
-                                                    <TrashIcon className="w-3.5 h-3.5" />
+                                                    <TrashIcon className="w-4 h-4 sm:w-3.5 h-3.5" />
                                                 </button>
                                             </div>
                                         </div>
