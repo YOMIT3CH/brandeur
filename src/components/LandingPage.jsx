@@ -30,7 +30,7 @@ export default function LandingPage() {
         }
         .animate-marquee {
           display: flex;
-          width: 200%;
+          width: max-content;
           animation: marquee 25s linear infinite;
         }
         .animate-marquee:hover {
@@ -39,9 +39,9 @@ export default function LandingPage() {
       `}</style>
 
             {/* Focused Background Lighting Orbs */}
-            <div className="absolute top-[-5%] left-[-5%] w-[450px] h-[450px] bg-blue-400/10 blur-[120px] rounded-full pointer-events-none" />
-            <div className="absolute top-[35%] right-[-5%] w-[400px] h-[400px] bg-cyan-400/10 blur-[100px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-[15%] left-[5%] w-[450px] h-[450px] bg-indigo-400/10 blur-[130px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-blue-400/10 blur-[100px] rounded-full pointer-events-none" />
+            <div className="absolute top-[35%] right-0 w-[250px] h-[250px] bg-cyan-400/10 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-0 left-[10%] w-[300px] h-[300px] bg-indigo-400/10 blur-[100px] rounded-full pointer-events-none" />
 
             {/* Contained Glassmorphism Navigation Layout */}
             <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-blue-50/80 px-4 sm:px-6 py-4 transition-all duration-300">
