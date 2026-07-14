@@ -397,7 +397,7 @@ export default function VendorDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans antialiased">
+        <div className="min-h-screen bg-white text-slate-900 font-sans antialiased overflow-x-hidden">
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-md border-b border-blue-50/60 sticky top-0 z-30 shadow-[0_2px_20px_rgba(37,99,235,0.01)]">
                 <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
