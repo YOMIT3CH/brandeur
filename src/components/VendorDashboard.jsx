@@ -488,18 +488,18 @@ export default function VendorDashboard() {
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="flex gap-2 mb-6 border-b border-blue-50">
+                <div className="flex flex-wrap gap-2 mb-6 border-b border-blue-50">
                     {['overview', 'products', 'orders', 'analytics'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-3 text-xs font-bold rounded-t-xl transition-all ${
+                            className={`px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold rounded-t-xl transition-all ${
                                 activeTab === tab
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-white text-slate-600 hover:bg-slate-50 border border-blue-100'
                             }`}
                         >
-                            {tab === 'overview' ? 'Store Overview' : tab === 'products' ? 'Product Catalog' : tab === 'orders' ? 'Order Management' : 'Analytics'}
+                            {tab === 'overview' ? 'Overview' : tab === 'products' ? 'Products' : tab === 'orders' ? 'Orders' : 'Analytics'}
                         </button>
                     ))}
                 </div>
